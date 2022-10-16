@@ -1,0 +1,44 @@
+<!doctype html>
+<script>
+(function() {
+const {kill, pid, stdout} = require("process");
+const {App: {argv, quit}, Window} = require("nw.gui");
+const win = Window.get();
+const signals = ["SIGTERM", "SIGINT", "SIGHUP"];
+
+stdout.write(`Argv: ${JSON.stringify(argv)}\n`);
+
+
+if (argv.includes("--process-removeAllListeners")) {
+	// makes NW.js crash when attaching a signal listener if nw2 is disabled
+	process.removeAllListeners();
+}
+win.removeAllListeners();
+
+
+win.on("close", () => {
+	stdout.write("close event triggered\n");
+	win.close(true);
+});
+for ( const sig of signals ) {
+	process.on(sig, (...args) => {
+		stdout.write(`received signal ${args}\n`);
+		quit();
+	});
+}
+
+
+let signal = argv[argv.length - 1];
+if (signal === "close") {
+	stdout.write("closing window...\n");
+	win.close();
+} else {
+	if (!signals.includes(signal)) {
+		signal = signals[0];
+	}
+	stdout.write(`sending signal ${signal}...\n`);
+	kill(pid, signal);
+}
+
+})();
+</script>

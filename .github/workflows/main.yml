@@ -1,0 +1,36 @@
+name: Run
+
+on:
+  - push
+
+jobs:
+  run:
+    strategy:
+      fail-fast: false
+      matrix:
+        nwjs:
+          - v0.64.1
+          - v0.65.1
+          - v0.66.1
+          - v0.67.1
+          - v0.68.1
+          - v0.69.1
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: download nwjs
+        shell: bash
+        run: |
+          curl -SLo download "https://dl.nwjs.io/${{ matrix.nwjs }}/nwjs-${{ matrix.nwjs }}-linux-x64.tar.gz"
+          tar -xzvf download
+          rm download
+      - name: run app
+        shell: bash
+        run: |
+          nwjs=./nwjs-${{ matrix.nwjs }}-linux-x64/nw
+          for params in {"",--disable-features=nw2}" "{"",--process-removeAllListeners}" "{close,SIGTERM}; do
+            xvfb-run --auto-servernum "${nwjs}" . --log-level=3 ${params} || true
+            echo
+            echo ------------------------------
+            echo
+          done

@@ -1,0 +1,12 @@
+{
+  "name": "nwjs-window-close",
+  "version": "0.0.1",
+  "main": "index.html",
+  "window": {
+    "width": 960,
+    "height": 540,
+    "position": "center",
+    "frame": true,
+    "show": true
+  }
+}
